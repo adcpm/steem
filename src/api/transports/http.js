@@ -41,13 +41,19 @@ export function jsonRpc(uri, {method, id, params}) {
 
 export default class HttpTransport extends Transport {
   send(api, data, callback) {
+    return this.sendUri(this.options.uri, false, api, data, callback);
+  }
+
+  sendUri(uri, methodPrefix, api, data, callback) {
     if (this.options.useAppbaseApi) {
-        api = 'condenser_api';
+      api = 'condenser_api';
     }
+    uri = uri? uri : this.options.uri;
     debug('Steem::send', api, data);
     const id = data.id || this.id++;
+    const methodName = (methodPrefix? methodPrefix + '.' : '') + 'call';
     const params = [api, data.method, data.params];
-    jsonRpc(this.options.uri, {method: 'call', id, params})
+    jsonRpc(uri, {method: methodName, id, params})
       .then(res => { callback(null, res) }, err => { callback(err) })
   }
 }
